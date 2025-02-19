@@ -15,6 +15,6 @@ module "ingress_nginx" {
 }
 
 module "grafana" {
-  source = "./modules/grafana"
+  source      = "./modules/grafana"
   issuer_name = module.cert_manager.cluster_issuer_name
 }

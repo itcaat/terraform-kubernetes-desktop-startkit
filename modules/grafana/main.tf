@@ -37,7 +37,7 @@ resource "kubernetes_deployment" "grafana" {
 
 resource "kubernetes_service" "grafana" {
   metadata {
-    name = var.name
+    name      = var.name
     namespace = var.namespace
   }
   spec {
@@ -54,7 +54,7 @@ resource "kubernetes_service" "grafana" {
 
 resource "kubernetes_ingress_v1" "grafana" {
   metadata {
-    name = var.name
+    name      = var.name
     namespace = var.namespace
     annotations = {
       "cert-manager.io/cluster-issuer" = var.issuer_name
