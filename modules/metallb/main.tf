@@ -16,7 +16,7 @@ metadata:
   namespace: ${var.namespace}
 spec:
   addresses:
-    %{for ip in var.metallb_ip_range~}
+    %{for ip in var.ip_range~}
     - ${ip}
     %{endfor~}
 YAML

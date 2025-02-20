@@ -33,6 +33,7 @@ resource "kubernetes_deployment" "grafana" {
       }
     }
   }
+  depends_on = [kubernetes_namespace.grafana]
 }
 
 resource "kubernetes_service" "grafana" {
@@ -50,6 +51,7 @@ resource "kubernetes_service" "grafana" {
       target_port = 3000
     }
   }
+  depends_on = [kubernetes_namespace.grafana]
 }
 
 resource "kubernetes_ingress_v1" "grafana" {
@@ -63,11 +65,11 @@ resource "kubernetes_ingress_v1" "grafana" {
   spec {
     ingress_class_name = var.ingress_class_name
     tls {
-      hosts       = [var.host]
-      secret_name = "${var.name}-tls"
+      hosts       = [local.hostname]
+      secret_name = local.secret_name
     }
     rule {
-      host = var.host
+      host = local.hostname
       http {
         path {
           path      = "/"
@@ -84,4 +86,5 @@ resource "kubernetes_ingress_v1" "grafana" {
       }
     }
   }
+  depends_on = [kubernetes_namespace.grafana]
 }

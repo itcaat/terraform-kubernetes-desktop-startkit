@@ -18,7 +18,7 @@ variable "chart_version" {
   default = "0.14.9"
 }
 
-variable "metallb_ip_range" {
+variable "ip_range" {
   type        = list(string)
   description = "IP Range for MetalLB"
   default     = ["127.0.0.1-127.0.0.1"]

@@ -23,12 +23,12 @@ variable "ingress_class_name" {
   default = "nginx"
 }
 
-variable "host" {
-  type    = string
-  default = "grafana.127.0.0.1.nip.io"
-}
-
 variable "issuer_name" {
   type        = string
   description = "The name of the ClusterIssuer to use for TLS"
+}
+
+locals {
+  hostname    = "${var.name}.127.0.0.1.nip.io"
+  secret_name = "${var.name}-tls"
 }

@@ -1,4 +1,4 @@
-output "cluster_issuer_name" {
+output "ingress_nginx_namespace" {
   description = "The name of the ClusterIssuer"
-  value       = kubectl_manifest.cluster_issuer.name
+  value       = helm_release.cert_manager.namespace
 }
