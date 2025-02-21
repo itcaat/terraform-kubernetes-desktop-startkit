@@ -29,10 +29,10 @@ module "ingress_nginx" {
   ]
 }
 
-module "grafana" {
-  source      = "../../modules/grafana"
-  name        = var.grafana_name
-  namespace   = var.grafana_namespace
+module "echo_server" {
+  source      = "../../modules/echo-server"
+  name        = var.echo_name
+  namespace   = var.echo_namespace
   issuer_name = module.cluster_issuer_selfsigned.cluster_issuer_name
   depends_on = [
     module.ingress_nginx

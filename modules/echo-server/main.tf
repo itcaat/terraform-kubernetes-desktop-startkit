@@ -1,10 +1,10 @@
-resource "kubernetes_namespace" "grafana" {
+resource "kubernetes_namespace" "echo" {
   metadata {
     name = var.namespace
   }
 }
 
-resource "kubernetes_deployment" "grafana" {
+resource "kubernetes_deployment" "echo" {
   metadata {
     name      = var.name
     namespace = var.namespace
@@ -24,19 +24,19 @@ resource "kubernetes_deployment" "grafana" {
       }
       spec {
         container {
-          image = "grafana/grafana:${var.image_tag}"
+          image = local.image
           name  = var.name
           port {
-            container_port = 3000
+            container_port = 80
           }
         }
       }
     }
   }
-  depends_on = [kubernetes_namespace.grafana]
+  depends_on = [kubernetes_namespace.echo]
 }
 
-resource "kubernetes_service" "grafana" {
+resource "kubernetes_service" "echo" {
   metadata {
     name      = var.name
     namespace = var.namespace
@@ -47,14 +47,14 @@ resource "kubernetes_service" "grafana" {
     }
     port {
       protocol    = "TCP"
-      port        = 80
-      target_port = 3000
+      port        = 3000
+      target_port = 80
     }
   }
-  depends_on = [kubernetes_namespace.grafana]
+  depends_on = [kubernetes_deployment.echo]
 }
 
-resource "kubernetes_ingress_v1" "grafana" {
+resource "kubernetes_ingress_v1" "echo" {
   metadata {
     name      = var.name
     namespace = var.namespace
@@ -86,5 +86,5 @@ resource "kubernetes_ingress_v1" "grafana" {
       }
     }
   }
-  depends_on = [kubernetes_namespace.grafana]
+  depends_on = [kubernetes_service.echo]
 }

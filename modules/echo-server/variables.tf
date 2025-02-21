@@ -5,7 +5,7 @@ variable "name" {
 
 variable "image_tag" {
   type    = string
-  default = "11.5.1"
+  default = "0.9.2"
 }
 
 variable "namespace" {
@@ -31,4 +31,5 @@ variable "issuer_name" {
 locals {
   hostname    = "${var.name}.127.0.0.1.nip.io"
   secret_name = "${var.name}-tls"
+  image       = "ealen/echo-server:${var.image_tag}"
 }

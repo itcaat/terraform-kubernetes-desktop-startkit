@@ -28,9 +28,16 @@ Each service is managed as a separate module for better reusability and organiza
 #### **📁 modules/ingress-nginx**
 - Deploys **Ingress-Nginx** as a controller for managing ingress traffic.
 
-#### **📁 modules/grafana**
-- Deploys **Grafana** using Kubernetes manifests.
-- Configures an **Ingress resource** with TLS issued by Cert-Manager.
+#### **📁 modules/echo-server**
+- Deploys **Echo Server** using Kubernetes manifests.
+- Configures an **Ingress resource** with self-signed TLS issued by Cert-Manager.
+
+### **Requirements**
+For local usage, for example, in Docker Desktop you might want to use selfsigned certificates. To do that process easy just install the tool `mkcert`.
+```sh
+brew install mkcert
+mkcert -install
+```
 
 ## 🛠️ Setup and Deployment
 1. **Initialize Terraform:**
@@ -57,19 +64,18 @@ Each service is managed as a separate module for better reusability and organiza
 
 5. **Verify resources in Kubernetes:**
    ```sh
-   curl https://grafana.127.0.0.1.nip.io
+   curl https://echo.127.0.0.1.nip.io
    ```
 
 ## 🔧 Configuration
 ### **Customizing Variables**
-You can override default variables by creating a `terraform.tfvars` file or passing them via CLI:
+You can override default variables by creating a `envs/local/terraform.tfvars` file or passing them via CLI:
 ```hcl
-kube_config_path = "~/.kube/config"
+kube_config_path  = "~/.kube/config"
 kube_context      = "docker-desktop"
-grafana_name      = "demo-grafana"
-grafana_namespace = "demo-grafana"
+echo_name      = "echo"
+echo_namespace = "demo"
 metallb_ip_range  = ["127.0.0.1-127.0.0.1"]
-
 ```
 
 ### **Destroying the Infrastructure**

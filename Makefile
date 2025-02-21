@@ -58,4 +58,4 @@ tf-reset:
 	$(MAKE) tf-destroy; \
 	$(MAKE) tf-clean-cache-and-state; \
 	$(MAKE) tf-init; \
-	$(MAKE) tf-apply-auto-approve;
+	$(MAKE) tf-apply-approve;

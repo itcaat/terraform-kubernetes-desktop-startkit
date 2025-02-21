@@ -9,16 +9,16 @@ variable "kube_context" {
   default = "docker-desktop"
 }
 
-variable "grafana_namespace" {
-  description = "Grafana Namespace"
+variable "echo_namespace" {
+  description = "Echo Server Namespace"
   type        = string
-  default     = "grafana"
+  default     = "demo"
 }
 
-variable "grafana_name" {
-  description = "Grafana Name. Will be used as hostname"
+variable "echo_name" {
+  description = "Echo Server Name. Will be used in hostname"
   type        = string
-  default     = "grafana"
+  default     = "echo"
 }
 
 variable "metallb_ip_range" {
