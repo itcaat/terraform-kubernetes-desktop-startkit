@@ -18,7 +18,12 @@ Each service is managed as a separate module for better reusability and organiza
 
 #### **📁 modules/cert-manager**
 - Installs **Cert-Manager** using Helm.
+
+#### **📁 modules/cluster-issuer-selfsigned**
 - Creates a **ClusterIssuer** and a self-signed CA certificate.
+
+#### **📁 modules/cluster-issuer-production**
+- Creates a **ClusterIssuer** that uses letsencrypt .
 
 #### **📁 modules/ingress-nginx**
 - Deploys **Ingress-Nginx** as a controller for managing ingress traffic.
@@ -30,17 +35,17 @@ Each service is managed as a separate module for better reusability and organiza
 ## 🛠️ Setup and Deployment
 1. **Initialize Terraform:**
    ```sh
-   make terraform-init
+   make tf-init
    ```
 
 2. **Plan the deployment:**
    ```sh
-   make terraform-plan
+   make tf-plan
    ```
 
 3. **Apply the changes:**
    ```sh
-   make terraform-apply
+   make tf-apply
    ```
 
 4. **Verify resources in Kubernetes:**
@@ -60,14 +65,36 @@ Each service is managed as a separate module for better reusability and organiza
 You can override default variables by creating a `terraform.tfvars` file or passing them via CLI:
 ```hcl
 kube_config_path = "~/.kube/config"
-kube_context = "docker-desktop"
-grafana_namespace = "example"
+kube_context      = "docker-desktop"
+grafana_name      = "demo-grafana"
+grafana_namespace = "demo-grafana"
+metallb_ip_range  = ["127.0.0.1-127.0.0.1"]
+
 ```
 
 ### **Destroying the Infrastructure**
 To remove all deployed resources:
 ```sh
-terraform destroy -auto-approve
+make tf-destory
+```
+
+### **Recreate Infrastructure**
+To delete all deployed resources and create again:
+```sh
+make tf-recreate
+```
+
+### **Full Reset Infrastructure**
+Delete everything including state and create again:
+```sh
+make tf-reset
+```
+
+## ** Terraform Graph **
+To visualize graph install dot app:
+```sh
+brew install graphviz
+make tf-graph
 ```
 
 ## 📌 Key Features

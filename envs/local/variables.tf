@@ -20,3 +20,9 @@ variable "grafana_name" {
   type        = string
   default     = "grafana"
 }
+
+variable "metallb_ip_range" {
+  type        = list(string)
+  description = "IP Range for MetalLB"
+  default     = ["127.0.0.1-127.0.0.1"]
+}

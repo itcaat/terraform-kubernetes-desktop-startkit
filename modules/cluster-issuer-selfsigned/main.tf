@@ -1,6 +1,6 @@
 resource "kubernetes_secret" "ca" {
   metadata {
-    name      = var.name
+    name      = var.secret_name
     namespace = var.namespace
   }
 
@@ -18,13 +18,13 @@ apiVersion: cert-manager.io/v1
 kind: ClusterIssuer
 metadata:
   name: ${var.cluster_issuer_name}
-  namespace: ${var.namespace}
 spec:
   ca:
-    secretName: ${var.name}
+    secretName: ${var.secret_name}
 YAML
 
   depends_on = [
     kubernetes_secret.ca
   ]
 }
+
