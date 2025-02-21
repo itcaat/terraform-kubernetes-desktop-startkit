@@ -30,17 +30,17 @@ Each service is managed as a separate module for better reusability and organiza
 ## 🛠️ Setup and Deployment
 1. **Initialize Terraform:**
    ```sh
-   terraform init
+   make terraform-init
    ```
 
 2. **Plan the deployment:**
    ```sh
-   terraform plan
+   make terraform-plan
    ```
 
 3. **Apply the changes:**
    ```sh
-   terraform apply -auto-approve
+   make terraform-apply
    ```
 
 4. **Verify resources in Kubernetes:**
@@ -50,14 +50,18 @@ Each service is managed as a separate module for better reusability and organiza
    kubectl get ingress -A
    ```
 
+5. **Verify resources in Kubernetes:**
+   ```sh
+   curl https://grafana.127.0.0.1.nip.io
+   ```
+
 ## 🔧 Configuration
 ### **Customizing Variables**
 You can override default variables by creating a `terraform.tfvars` file or passing them via CLI:
 ```hcl
 kube_config_path = "~/.kube/config"
 kube_context = "docker-desktop"
-metallb_ip_range = ["127.0.0.1-127.0.0.1", "192.168.1.100-192.168.1.200"]
-grafana_namespace = "monitoring"
+grafana_namespace = "example"
 ```
 
 ### **Destroying the Infrastructure**

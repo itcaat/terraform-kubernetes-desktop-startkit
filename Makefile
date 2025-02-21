@@ -9,3 +9,14 @@ clean-cache:
 	find . -type f -name ".terraform.lock.hcl" -prune -exec rm -rf {} \;
 	find . -empty -type d -delete
 
+terraform-init-local:
+	cd envs/local; terraform init -upgrade
+
+terraform-init-plan:
+	cd envs/local; terraform plan
+
+terraform-apply:
+	cd envs/local; terraform apply
+
+terraform-apply-auto-approve:
+	cd envs/local; terraform apply -auto-approve
