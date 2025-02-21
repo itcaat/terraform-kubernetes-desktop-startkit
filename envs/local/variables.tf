@@ -12,7 +12,7 @@ variable "kube_context" {
 variable "grafana_namespace" {
   description = "Grafana Namespace"
   type        = string
-  default     = "demo"
+  default     = "grafana"
 }
 
 variable "grafana_name" {
