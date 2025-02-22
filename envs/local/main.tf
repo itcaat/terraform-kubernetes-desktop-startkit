@@ -42,3 +42,9 @@ module "echo_server" {
     module.ingress_nginx
   ]
 }
+
+module "argocd" {
+  source           = "../../modules/argocd"
+  ingress_hostname = "argocd.127.0.0.1.nip.io"
+  ingress_class    = "nginx"
+}
