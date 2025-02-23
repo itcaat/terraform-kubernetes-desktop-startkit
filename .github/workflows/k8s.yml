@@ -1,36 +1,40 @@
-name: Kube-ez CI
+name: Terraform Apply
 on:
-  push:
   pull_request:
   workflow_dispatch:
-
-env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  DOCKER_IMAGE_NAME: kube-ez
-  DOCKERFILE_PATH: ./Dockerfile
+  push:
+    branches:
+      - main
 
 jobs:
-  Test-on-cluster:
+  run-mock-k8s-and-apply:
     runs-on: ubuntu-latest
     steps:
-## starts the cluster
+      - uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+      - name: Install terraform
+        run: | 
+          wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+          sudo apt update && sudo apt install terraform -y
+      - name: Configure mkcert
+        run: | 
+          sudo apt install ca-certificates libnss3-tools -y
+          wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-amd64
+          chmod +x ./mkcert-v1.4.4-linux-amd64
+          sudo mv ./mkcert-v1.4.4-linux-amd64 /usr/local/bin/mkcert
+          mkcert --install
+          ls -la "$(mkcert -CAROOT)"
       - name: Testing on a k8s Kind Cluster
-        uses: helm/kind-action@v1.4.0
-## makes sure cluster is up and running
+        uses: helm/kind-action@v1.12.0
       - run: |
           kubectl cluster-info
           kubectl get nodes
+          kubectl config rename-context kind-chart-testing docker-desktop
       - name : Preparing cluster for kube-ez
-## Commands that setup the cluster as per my project needs
         run: |
-          kubectl apply -f https://raw.githubusercontent.com/kitarp29/kube-ez/main/yamls/sa.yaml
-          kubectl apply -f https://raw.githubusercontent.com/kitarp29/kube-ez/main/yamls/crb.yaml
-          kubectl run kube-ez --image=ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGE_NAME }}:${{ github.sha }} --port=8000
-          sleep 20
-          kubectl get po
-          kubectl port-forward kube-ez 8000:8000 &>/dev/null &
-          sleep 5
-          kubectl port-forward kube-ez 8000:8000 &>/dev/null &
-      - run: |
-          curl -i http://localhost:8000/
+          export TF_VAR_cluster_issuer_selfsigned_ca_cert="$(base64 < "$(mkcert -CAROOT)/rootCA.pem")"
+          export TF_VAR_cluster_issuer_selfsigned_ca_key="$(base64 < "$(mkcert -CAROOT)/rootCA-key.pem")"
+          make tf-init
+          make tf-apply-approve
