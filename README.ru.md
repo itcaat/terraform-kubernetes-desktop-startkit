@@ -26,6 +26,30 @@
 
 Всё это описано как Terraform-код в виде отдельных модулей, поэтому позже вы сможете легко добавить свои приложения, следуя тому же паттерну, что и echo-сервер.
 
+## Архитектура
+
+```mermaid
+graph TD
+    mkcert["mkcert (локальный CA)"] -.->|CA сертификат/ключ| CIS
+
+    subgraph terraform ["Управляется Terraform"]
+        K8s["Docker Desktop / Kubernetes"] --> MetalLB
+        K8s --> CM["Cert-Manager"]
+        MetalLB --> Ingress["Ingress-Nginx"]
+        CM --> CIS["ClusterIssuer Selfsigned"]
+        CM --> CIP["ClusterIssuer Production"]
+        Ingress -->|маршрутизация трафика| Echo["Echo Server (демо)"]
+        CIS -->|TLS-сертификат| Echo
+    end
+```
+
+**Порядок развёртывания (сверху вниз):**
+- **Docker Desktop / Kubernetes** — платформа, на которой всё размещается.
+- **MetalLB** назначает реальный IP (`127.0.0.1`) ingress-контроллеру. **Cert-Manager** автоматизирует управление сертификатами.
+- **Ingress-Nginx** маршрутизирует HTTP/HTTPS-трафик по hostname. **ClusterIssuers** выпускают TLS-сертификаты (самоподписанные через CA mkcert или production через Let's Encrypt).
+- **Echo Server** — демо-приложение в конце цепочки, доступное по адресу `https://echo.127.0.0.1.nip.io`.
+- **mkcert** (внешний, пунктирная линия) — предоставляет CA-сертификат и ключ для локального доверия.
+
 ## Структура проекта
 
 ### **Окружения**

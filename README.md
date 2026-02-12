@@ -26,6 +26,30 @@ By the end of this guide, you will have a fully working local Kubernetes cluster
 
 All of this is defined as Terraform code using separate modules, so you can easily add your own applications later by following the same pattern as the echo server.
 
+## Architecture
+
+```mermaid
+graph TD
+    mkcert["mkcert (local CA)"] -.->|CA cert/key| CIS
+
+    subgraph terraform ["Managed by Terraform"]
+        K8s["Docker Desktop / Kubernetes"] --> MetalLB
+        K8s --> CM["Cert-Manager"]
+        MetalLB --> Ingress["Ingress-Nginx"]
+        CM --> CIS["ClusterIssuer Selfsigned"]
+        CM --> CIP["ClusterIssuer Production"]
+        Ingress -->|routes traffic| Echo["Echo Server (demo)"]
+        CIS -->|TLS certificate| Echo
+    end
+```
+
+**Provisioning order (top to bottom):**
+- **Docker Desktop / Kubernetes** — the platform that hosts everything.
+- **MetalLB** assigns a real IP (`127.0.0.1`) to the ingress controller. **Cert-Manager** automates certificate management.
+- **Ingress-Nginx** routes HTTP/HTTPS traffic by hostname. **ClusterIssuers** issue TLS certificates (self-signed via mkcert CA, or production via Let's Encrypt).
+- **Echo Server** — the demo app at the end of the chain, reachable at `https://echo.127.0.0.1.nip.io`.
+- **mkcert** (external, dashed line) — provides the CA certificate and key for local trust.
+
 ## Project Structure
 
 ### **Environments**
