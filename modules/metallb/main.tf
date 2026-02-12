@@ -13,7 +13,7 @@ resource "kubectl_manifest" "metallb_ip_pool" {
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 metadata:
-  name: ingress-ip-pool
+  name: ip-pool-${replace(replace(each.value, ".", "-"), "/", "-")}
   namespace: ${var.namespace}
 spec:
   addresses:

@@ -5,6 +5,7 @@ resource "kubernetes_namespace" "echo" {
 }
 
 resource "kubernetes_deployment" "echo" {
+  depends_on = [kubernetes_namespace.echo]
   metadata {
     name      = var.name
     namespace = var.namespace
@@ -36,6 +37,7 @@ resource "kubernetes_deployment" "echo" {
 }
 
 resource "kubernetes_service" "echo" {
+  depends_on = [kubernetes_namespace.echo]
   metadata {
     name      = var.name
     namespace = var.namespace
@@ -53,6 +55,7 @@ resource "kubernetes_service" "echo" {
 }
 
 resource "kubernetes_ingress_v1" "echo" {
+  depends_on = [kubernetes_namespace.echo]
   metadata {
     name      = var.name
     namespace = var.namespace

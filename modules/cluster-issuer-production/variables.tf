@@ -12,7 +12,11 @@ variable "namespace" {
 variable "acme_email" {
   type        = string
   description = "Email used for ACME registration"
-  default     = "admin@example.com"
+
+  validation {
+    condition     = can(regex("^[^@]+@[^@]+\\.[^@]+$", var.acme_email))
+    error_message = "Must be a valid email address."
+  }
 }
 
 variable "acme_server" {

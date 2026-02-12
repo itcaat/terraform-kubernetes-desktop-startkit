@@ -1,5 +1,6 @@
 module "metallb" {
-  source = "../../modules/metallb"
+  source   = "../../modules/metallb"
+  ip_range = local.metallb_ip_range
 }
 
 module "cert_manager" {
@@ -41,6 +42,7 @@ module "echo_server" {
   ingress_class_name = local.ingress_class_name
   issuer_name        = local.cluster_issuer_selfsigned
   depends_on = [
-    module.ingress_nginx
+    module.ingress_nginx,
+    module.cluster_issuer_selfsigned
   ]
 }

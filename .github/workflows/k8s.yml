@@ -1,4 +1,5 @@
-name: Terraform Apply
+name: Terraform
+
 on:
   pull_request:
   workflow_dispatch:
@@ -7,32 +8,81 @@ on:
       - main
 
 jobs:
-  run-mock-k8s-and-apply:
+  terraform-plan:
+    name: Terraform Plan
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-            fetch-depth: 0
-      - name: Install terraform
-        run: | 
-          wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-          sudo apt update && sudo apt install terraform -y
+          fetch-depth: 0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
       - name: Configure mkcert
-        run: | 
+        run: |
           sudo apt install ca-certificates libnss3-tools -y
-          wget https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-amd64
+          wget -q https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-amd64
           chmod +x ./mkcert-v1.4.4-linux-amd64
           sudo mv ./mkcert-v1.4.4-linux-amd64 /usr/local/bin/mkcert
           mkcert --install
-          ls -la "$(mkcert -CAROOT)"
-      - name: Testing on a k8s Kind Cluster
+
+      - name: Create Kind cluster
         uses: helm/kind-action@v1.12.0
-      - run: |
+
+      - name: Configure kubectl context
+        run: |
           kubectl cluster-info
           kubectl get nodes
           kubectl config rename-context kind-chart-testing docker-desktop
-      - name : Preparing cluster for kube-ez
+
+      - name: Terraform Init
+        run: |
+          export TF_VAR_cluster_issuer_selfsigned_ca_cert="$(base64 < "$(mkcert -CAROOT)/rootCA.pem")"
+          export TF_VAR_cluster_issuer_selfsigned_ca_key="$(base64 < "$(mkcert -CAROOT)/rootCA-key.pem")"
+          make tf-init
+
+      - name: Terraform Plan
+        run: |
+          export TF_VAR_cluster_issuer_selfsigned_ca_cert="$(base64 < "$(mkcert -CAROOT)/rootCA.pem")"
+          export TF_VAR_cluster_issuer_selfsigned_ca_key="$(base64 < "$(mkcert -CAROOT)/rootCA-key.pem")"
+          make tf-plan
+
+  terraform-apply:
+    name: Terraform Apply
+    needs: terraform-plan
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.5.0"
+
+      - name: Configure mkcert
+        run: |
+          sudo apt install ca-certificates libnss3-tools -y
+          wget -q https://github.com/FiloSottile/mkcert/releases/download/v1.4.4/mkcert-v1.4.4-linux-amd64
+          chmod +x ./mkcert-v1.4.4-linux-amd64
+          sudo mv ./mkcert-v1.4.4-linux-amd64 /usr/local/bin/mkcert
+          mkcert --install
+
+      - name: Create Kind cluster
+        uses: helm/kind-action@v1.12.0
+
+      - name: Configure kubectl context
+        run: |
+          kubectl cluster-info
+          kubectl get nodes
+          kubectl config rename-context kind-chart-testing docker-desktop
+
+      - name: Terraform Apply
         run: |
           export TF_VAR_cluster_issuer_selfsigned_ca_cert="$(base64 < "$(mkcert -CAROOT)/rootCA.pem")"
           export TF_VAR_cluster_issuer_selfsigned_ca_key="$(base64 < "$(mkcert -CAROOT)/rootCA-key.pem")"
